@@ -11,22 +11,22 @@ interface StatsCardsProps {
 export function StatsCards({ data }: StatsCardsProps) {
     if (data.length === 0) return null;
 
-    const avgShortFloat = data.reduce((acc, stock) => acc + stock.shortFloat, 0) / data.length;
-    const highestShort = data[0];
     const totalShortInterest = data.reduce((acc, stock) => acc + stock.shortInterest, 0);
+    const avgDaysToCover = data.reduce((acc, stock) => acc + stock.daysToCover, 0) / data.length;
+    const highestShort = data[0];
 
     const stats = [
         {
-            title: "Highest Short Float",
-            value: `${highestShort?.shortFloat.toFixed(1)}%`,
-            subtitle: highestShort?.ticker,
+            title: "Highest Short Interest",
+            value: formatNumber(highestShort?.shortInterest || 0),
+            subtitle: highestShort?.ticker || "N/A",
             icon: Target,
             gradient: "from-red-500 to-orange-500",
             shadow: "shadow-red-500/20",
         },
         {
-            title: "Average Short Float",
-            value: `${avgShortFloat.toFixed(1)}%`,
+            title: "Avg Days to Cover",
+            value: avgDaysToCover.toFixed(1),
             subtitle: "Across top 25 stocks",
             icon: BarChart3,
             gradient: "from-orange-500 to-yellow-500",

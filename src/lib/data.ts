@@ -2,16 +2,17 @@ export interface ShortInterestStock {
   rank: number;
   ticker: string;
   companyName: string;
-  shortFloat: number; // percentage
+  shortFloat: number; // percentage - may be 0 if not available
   shortInterest: number; // number of shares shorted
   floatShares: number; // total float shares
   avgVolume: number; // average daily volume
   daysToCover: number; // short interest / avg volume
   previousShortFloat: number; // for showing change
+  changePercent?: number; // percent change from previous period
+  settlementDate?: string; // date of the data
 }
 
-// Sample data for the top 25 most shorted stocks
-// In production, this would come from a real API
+// Sample data for the top 25 most shorted stocks (fallback data)
 export const sampleShortInterestData: ShortInterestStock[] = [
   { rank: 1, ticker: "CVNA", companyName: "Carvana Co.", shortFloat: 52.3, shortInterest: 41200000, floatShares: 78800000, avgVolume: 8420000, daysToCover: 4.9, previousShortFloat: 51.8 },
   { rank: 2, ticker: "BYND", companyName: "Beyond Meat Inc.", shortFloat: 41.2, shortInterest: 26300000, floatShares: 63800000, avgVolume: 2150000, daysToCover: 12.2, previousShortFloat: 40.5 },
@@ -58,9 +59,8 @@ export function getShortFloatColor(shortFloat: number): string {
   return "text-green-400";
 }
 
-export function getChangeIndicator(current: number, previous: number): { arrow: string; color: string } {
-  const diff = current - previous;
-  if (diff > 0) return { arrow: "↑", color: "text-red-400" };
-  if (diff < 0) return { arrow: "↓", color: "text-green-400" };
+export function getChangeIndicator(changePercent: number): { arrow: string; color: string } {
+  if (changePercent > 0) return { arrow: "↑", color: "text-red-400" };
+  if (changePercent < 0) return { arrow: "↓", color: "text-green-400" };
   return { arrow: "—", color: "text-zinc-500" };
 }

@@ -11,17 +11,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShortInterestStock, formatNumber, getShortFloatColor, getChangeIndicator } from "@/lib/data";
+import { ShortInterestStock, formatNumber, getChangeIndicator } from "@/lib/data";
 
 interface StockTableProps {
     data: ShortInterestStock[];
     isLoading: boolean;
 }
 
-function getShortFloatBadgeVariant(shortFloat: number): "destructive" | "secondary" | "outline" {
-    if (shortFloat >= 30) return "destructive";
-    if (shortFloat >= 20) return "secondary";
-    return "outline";
+function getDaysToCoverColor(days: number): string {
+    if (days >= 10) return "bg-red-500/20 text-red-400 border-red-500/30";
+    if (days >= 5) return "bg-orange-500/20 text-orange-400 border-orange-500/30";
+    return "bg-zinc-700/50 text-zinc-300 border-zinc-600";
 }
 
 function LoadingSkeleton() {
@@ -59,15 +59,15 @@ export function StockTable({ data, isLoading }: StockTableProps) {
                             <TableHead className="text-zinc-400 font-semibold w-16">#</TableHead>
                             <TableHead className="text-zinc-400 font-semibold">Ticker</TableHead>
                             <TableHead className="text-zinc-400 font-semibold hidden md:table-cell">Company</TableHead>
-                            <TableHead className="text-zinc-400 font-semibold text-right">Short Float</TableHead>
-                            <TableHead className="text-zinc-400 font-semibold text-right hidden sm:table-cell">Short Interest</TableHead>
+                            <TableHead className="text-zinc-400 font-semibold text-right">Short Interest</TableHead>
+                            <TableHead className="text-zinc-400 font-semibold text-right hidden sm:table-cell">Avg Volume</TableHead>
                             <TableHead className="text-zinc-400 font-semibold text-right hidden lg:table-cell">Days to Cover</TableHead>
-                            <TableHead className="text-zinc-400 font-semibold text-center w-20">Change</TableHead>
+                            <TableHead className="text-zinc-400 font-semibold text-center w-24">Change %</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {data.map((stock, index) => {
-                            const change = getChangeIndicator(stock.shortFloat, stock.previousShortFloat);
+                            const change = getChangeIndicator(stock.changePercent ?? 0);
                             return (
                                 <TableRow
                                     key={stock.ticker}
@@ -86,27 +86,24 @@ export function StockTable({ data, isLoading }: StockTableProps) {
                                         {stock.companyName}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Badge
-                                            variant={getShortFloatBadgeVariant(stock.shortFloat)}
-                                            className={`font-mono ${stock.shortFloat >= 30
-                                                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30"
-                                                    : stock.shortFloat >= 20
-                                                        ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border-orange-500/30"
-                                                        : "bg-zinc-700/50 text-zinc-300 hover:bg-zinc-700 border-zinc-600"
-                                                }`}
-                                        >
-                                            {stock.shortFloat.toFixed(1)}%
-                                        </Badge>
+                                        <span className="font-mono text-white font-medium">
+                                            {formatNumber(stock.shortInterest)}
+                                        </span>
                                     </TableCell>
                                     <TableCell className="text-right font-mono text-zinc-300 hidden sm:table-cell">
-                                        {formatNumber(stock.shortInterest)}
+                                        {formatNumber(stock.avgVolume)}
                                     </TableCell>
-                                    <TableCell className="text-right font-mono text-zinc-400 hidden lg:table-cell">
-                                        {stock.daysToCover.toFixed(1)}
+                                    <TableCell className="text-right hidden lg:table-cell">
+                                        <Badge
+                                            variant="outline"
+                                            className={`font-mono ${getDaysToCoverColor(stock.daysToCover)}`}
+                                        >
+                                            {stock.daysToCover.toFixed(1)}
+                                        </Badge>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <span className={`font-bold ${change.color}`}>
-                                            {change.arrow}
+                                        <span className={`font-mono font-bold ${change.color}`}>
+                                            {change.arrow} {Math.abs(stock.changePercent ?? 0).toFixed(1)}%
                                         </span>
                                     </TableCell>
                                 </TableRow>
